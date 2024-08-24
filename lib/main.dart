@@ -1,7 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:weather_app/pages/weather_page.dart';
 import 'package:weather_app/provider/theme.dart';
+import 'package:weather_app/ui/pages/weather_page.dart';
 
 void main() {
   runApp(
@@ -22,6 +23,17 @@ class WeatherApp extends ConsumerWidget {
       darkTheme: ref.watch(darkThemeProvider),
       themeMode: ref.watch(themeModeProvider),
       home: const WeatherPage(),
+      scrollBehavior: WebScrollBehavior(),
     );
   }
+}
+
+class WebScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => { 
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    // etc.
+  };
 }

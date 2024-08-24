@@ -1,12 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:weather_app/models/location.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/provider/weather.dart';
 import 'package:weather_app/util/location.dart';
-import 'package:weather_app/widgets/weather_item.dart';
-
+import 'package:weather_app/ui/widgets/weather_item.dart';
+import 'package:intl/intl.dart';
 
 class WeatherPage extends ConsumerStatefulWidget {
   const WeatherPage({super.key});
@@ -26,8 +27,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-    final searchResult =
-        ref.watch(searchCityProvider(search: _searchController.text));
+    final searchResult = ref.watch(searchCityProvider(search: _searchController.text));
 
     return Scaffold(
       appBar: AppBar(
@@ -60,7 +60,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     final city = _selectedCity!;
     final weatherResult = ref.watch(
       weatherProvider(
-        WeatherRequest(longitude: city.longitude, latitude: city.latitude),
+        WeatherRequest(longitude: city.longitude, latitude: city.latitude, forecastHours: 24),
       ),
     );
     return weatherResult.when(
@@ -105,9 +105,15 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: weather.hourly.time.mapIndexed((index, time) {
-          return WeatherItem(
-            wmoCode: weather.hourly.weatherCodes[index],
-            temperature: weather.hourly.temperatues[index],
+          return Column(
+            children: [
+              Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
+              const SizedBox(height: 12,),
+              WeatherItem(
+                wmoCode: weather.hourly.weatherCodes[index],
+                temperature: weather.hourly.temperatues[index],
+              ),
+            ],
           );
         }).toList(),
       ),
@@ -119,9 +125,11 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
       children: [
         TextField(
           controller: _searchController,
+          onTapOutside: (event) => {FocusManager.instance.primaryFocus?.unfocus()},
           onChanged: (value) => ref.invalidate(searchCityProvider),
           decoration: InputDecoration(
             hintText: 'Search for a city',
+            hintStyle: TextStyle(color: Colors.grey.shade800),
             prefixIcon: const Padding(
               padding: EdgeInsets.only(left: 8, right: 4),
               child: Icon(Icons.search),
@@ -198,6 +206,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
                 title: Text(city.name),
                 subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
                 onTap: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
                   setState(() => _selectedCity = data[index]);
                   _searchController.clear();
                 },
@@ -215,8 +224,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
       ),
     );
   }
-
-
 
   OutlineInputBorder _buildTextfieldBorder() {
     return OutlineInputBorder(
