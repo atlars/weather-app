@@ -12,7 +12,12 @@ Future<List<City>> searchCity(SearchCityRef ref, {String search = ""}) async {
 
   if (search.isEmpty) return [];
 
-  await Future<void>.delayed(const Duration(milliseconds: 300));
+  final link = ref.keepAlive();
+  ref.onDispose(() {
+    link.close();
+  });
+
+  await Future<void>.delayed(const Duration(milliseconds: 250));
 
   if (cancelToken.isCancelled) {
     throw Exception('Cancelled');

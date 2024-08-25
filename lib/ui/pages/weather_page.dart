@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/provider/weather.dart';
-import 'package:weather_app/util/location.dart';
 import 'package:weather_app/ui/widgets/weather_item.dart';
-import 'package:intl/intl.dart';
+import 'package:weather_app/util/location.dart';
 
 class WeatherPage extends ConsumerStatefulWidget {
   const WeatherPage({super.key});
@@ -17,7 +17,7 @@ class WeatherPage extends ConsumerStatefulWidget {
 }
 
 class _WeatherPageState extends ConsumerState<WeatherPage> {
-  final TextEditingController _searchController = TextEditingController();
+  final SearchController _searchController = SearchController();
   City? _selectedCity;
 
   @override
@@ -27,19 +27,9 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-    final searchResult = ref.watch(searchCityProvider(search: _searchController.text));
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.cloud_outlined),
-            SizedBox(width: 8),
-            Text('Weather'),
-          ],
-        ),
-      ),
+      appBar:
+          AppBar(title: _buildSearchbar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Stack(
@@ -49,7 +39,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
                 padding: const EdgeInsets.only(top: 62, left: 10, right: 10),
                 child: _buildWeather(),
               ),
-            _buildSearchBar(searchResult),
           ],
         ),
       ),
@@ -108,7 +97,9 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
           return Column(
             children: [
               Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
-              const SizedBox(height: 12,),
+              const SizedBox(
+                height: 12,
+              ),
               WeatherItem(
                 wmoCode: weather.hourly.weatherCodes[index],
                 temperature: weather.hourly.temperatues[index],
@@ -120,43 +111,65 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     );
   }
 
-  Widget _buildSearchBar(AsyncValue<List<City>> searchResult) {
-    return Column(
-      children: [
-        TextField(
-          controller: _searchController,
-          onTapOutside: (event) => {FocusManager.instance.primaryFocus?.unfocus()},
-          onChanged: (value) => ref.invalidate(searchCityProvider),
-          decoration: InputDecoration(
-            hintText: 'Search for a city',
-            hintStyle: TextStyle(color: Colors.grey.shade800),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.only(left: 8, right: 4),
-              child: Icon(Icons.search),
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            suffixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  ref.invalidate(searchCityProvider);
-                  _searchController.clear();
-                },
-              ),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            enabledBorder: _buildTextfieldBorder(),
-            focusedBorder: _buildTextfieldBorder(),
-          ),
-          style: const TextStyle(fontSize: 16),
+  Iterable<Widget> _lastSuggestions = <Widget>[];
+  final FocusNode _searchFocus = FocusNode();
+
+  Widget _buildSearchbar() {
+    return SearchAnchor(
+      isFullScreen: true,
+      viewElevation: 0,
+      searchController: _searchController,
+      headerTextStyle: TextStyle(fontSize: 14),
+      builder: (context, controller) {
+        return SearchBar(
+          focusNode: _searchFocus,
+          constraints: BoxConstraints.tight(Size.fromHeight(kToolbarHeight - 14)),
+          elevation: WidgetStateProperty.all(0),
+          shadowColor: WidgetStateProperty.all(Colors.grey.shade400),
+          overlayColor: WidgetStateProperty.all(Colors.grey.shade200),
+          backgroundColor: WidgetStateProperty.all(Colors.grey.shade200),
+          hintText: "Search a city",
+          leading: const Icon(Icons.search),
+          controller: controller,
+          onTap: () {
+            controller.openView();
+          },
+          textStyle: WidgetStateProperty.all(TextStyle(fontSize: 14)),
+        );
+      },
+      suggestionsBuilder: (context, controller) {
+        ref.invalidate(searchCityProvider);
+        return ref.read(searchCityProvider(search: controller.text.trim()).future).then(
+          (cities) {
+            final suggestions = cities.map((city) => _citySearchResult(city));
+            _lastSuggestions = suggestions;
+            return suggestions;
+          },
+        ).catchError((error) {
+          return _lastSuggestions;
+        });
+      },
+    );
+  }
+
+  Widget _citySearchResult(City city) {
+    return ListTile(
+      leading: Text(
+        LocationUtils.countryCodeToEmoji(city.countryCode),
+        style: const TextStyle(
+          fontFamily: "NotoColorEmoji",
+          fontSize: 16,
         ),
-        if (_searchController.text.isNotEmpty) _buildSearchResults(searchResult)
-      ],
+      ),
+      title: Text(city.name),
+      subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
+      onTap: () {
+        setState(() {
+          _selectedCity = city;
+        });
+        _searchController.closeView(_searchController.text);
+        _searchFocus.unfocus();
+      },
     );
   }
 
@@ -195,22 +208,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
             itemCount: data.length,
             itemBuilder: (context, index) {
               final city = data[index];
-              return ListTile(
-                leading: Text(
-                  LocationUtils.countryCodeToEmoji(data[index].countryCode),
-                  style: const TextStyle(
-                    fontFamily: "NotoColorEmoji",
-                    fontSize: 16,
-                  ),
-                ),
-                title: Text(city.name),
-                subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
-                onTap: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  setState(() => _selectedCity = data[index]);
-                  _searchController.clear();
-                },
-              );
             },
           );
         },
@@ -222,18 +219,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
           ),
         ),
       ),
-    );
-  }
-
-  OutlineInputBorder _buildTextfieldBorder() {
-    return OutlineInputBorder(
-      borderRadius: _searchController.text.isNotEmpty
-          ? const BorderRadius.only(
-              topLeft: Radius.circular(18),
-              topRight: Radius.circular(18),
-            )
-          : BorderRadius.circular(30),
-      borderSide: BorderSide(color: Colors.grey.shade300),
     );
   }
 
