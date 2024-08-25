@@ -29,7 +29,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          AppBar(title: _buildSearchbar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
+          AppBar(title: _buildNewSearchBar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Stack(
@@ -39,6 +39,40 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
                 padding: const EdgeInsets.only(top: 62, left: 10, right: 10),
                 child: _buildWeather(),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewSearchBar() {
+    return GestureDetector(
+      onTap: () async {
+        final result = await showSearch(context: context, delegate: SearchCityDelegate(ref));
+        if (result != null) {
+          setState(() => _selectedCity = result);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.transparent),
+            color: Colors.grey.shade200),
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search,
+              size: 22,
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Text(
+              _selectedCity?.name ?? "Search",
+              style: const TextStyle(fontSize: 14),
+            ),
           ],
         ),
       ),
@@ -111,48 +145,65 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     );
   }
 
-  Iterable<Widget> _lastSuggestions = <Widget>[];
-  final FocusNode _searchFocus = FocusNode();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+}
 
-  Widget _buildSearchbar() {
-    return SearchAnchor(
-      isFullScreen: true,
-      viewElevation: 0,
-      searchController: _searchController,
-      headerTextStyle: TextStyle(fontSize: 14),
-      builder: (context, controller) {
-        return SearchBar(
-          focusNode: _searchFocus,
-          constraints: BoxConstraints.tight(Size.fromHeight(kToolbarHeight - 14)),
-          elevation: WidgetStateProperty.all(0),
-          shadowColor: WidgetStateProperty.all(Colors.grey.shade400),
-          overlayColor: WidgetStateProperty.all(Colors.grey.shade200),
-          backgroundColor: WidgetStateProperty.all(Colors.grey.shade200),
-          hintText: "Search a city",
-          leading: const Icon(Icons.search),
-          controller: controller,
-          onTap: () {
-            controller.openView();
-          },
-          textStyle: WidgetStateProperty.all(TextStyle(fontSize: 14)),
+class SearchCityDelegate extends SearchDelegate<City?> {
+  final WidgetRef ref;
+
+  SearchCityDelegate(this.ref)
+      : super(
+          searchFieldLabel: "Search a city",
+          searchFieldStyle: TextStyle(fontSize: 16, color: Colors.grey.shade800),
         );
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () => query = "",
+        icon: const Icon(Icons.close),
+      )
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
       },
-      suggestionsBuilder: (context, controller) {
-        ref.invalidate(searchCityProvider);
-        return ref.read(searchCityProvider(search: controller.text.trim()).future).then(
-          (cities) {
-            final suggestions = cities.map((city) => _citySearchResult(city));
-            _lastSuggestions = suggestions;
-            return suggestions;
-          },
-        ).catchError((error) {
-          return _lastSuggestions;
-        });
+      icon: const Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    ref.invalidate(searchCityProvider);
+
+    return FutureBuilder(
+      future: ref.read(searchCityProvider(search: query.trim()).future),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView(
+            children: snapshot.data?.map((city) => _citySearchResult(city, context)).toList() ?? [],
+          );
+        }
+        return const CircularProgressIndicator();
       },
     );
   }
 
-  Widget _citySearchResult(City city) {
+  Widget _citySearchResult(City city, BuildContext context) {
     return ListTile(
       leading: Text(
         LocationUtils.countryCodeToEmoji(city.countryCode),
@@ -164,67 +215,8 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
       title: Text(city.name),
       subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
       onTap: () {
-        setState(() {
-          _selectedCity = city;
-        });
-        _searchController.closeView(_searchController.text);
-        _searchFocus.unfocus();
+        close(context, city);
       },
     );
-  }
-
-  Widget _buildSearchResults(AsyncValue<List<City>> searchResult) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(4),
-          bottomRight: Radius.circular(4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 1,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: searchResult.when(
-        data: (data) {
-          if (data.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 22),
-                child: Text("No results"),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            shrinkWrap: true,
-            itemCount: data.length,
-            itemBuilder: (context, index) {
-              final city = data[index];
-            },
-          );
-        },
-        error: (error, stacktrace) => const Text("Error"),
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 22),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 }
