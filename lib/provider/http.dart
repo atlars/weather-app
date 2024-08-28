@@ -7,6 +7,12 @@ final dioProvider = Provider<Dio>((ref) {
       responseType: ResponseType.json,
     ),
   );
+
+  dio.interceptors.add(LogInterceptor(
+    request: true,
+    error: true,
+    logPrint: (object) => print("Response"),
+  ));
   ref.onDispose(dio.close);
   return dio;
 });

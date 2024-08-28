@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/models/weather.dart';
@@ -154,6 +154,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 }
 
 class SearchCityDelegate extends SearchDelegate<City?> {
+
   SearchCityDelegate()
       : super(
           searchFieldLabel: "Search a city",
@@ -196,17 +197,25 @@ class SearchCityDelegate extends SearchDelegate<City?> {
   }
 }
 
-class _SearchSuggestions extends ConsumerWidget {
+class _SearchSuggestions extends ConsumerStatefulWidget {
   final String query;
-  final Function(City) onSuggestionClicked;
+  final void Function(City) onSuggestionClicked;
 
   const _SearchSuggestions({required this.query, required this.onSuggestionClicked});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cities = ref.watch(searchCityProvider(search: query.trim()));
+  _SearchSuggestionsState createState() => _SearchSuggestionsState();
+}
+
+class _SearchSuggestionsState extends ConsumerState<_SearchSuggestions> {
+  List<City> _lastResults = [];
+
+  @override
+  Widget build(BuildContext context) {
+    final cities = ref.watch(searchCityProvider(search: widget.query.trim()));
     return cities.when(
       data: (data) {
+        if(data.isNotEmpty) _lastResults = [...data];
         return _buildSuggestions(data);
       },
       error: (error, _) {
@@ -215,8 +224,8 @@ class _SearchSuggestions extends ConsumerWidget {
         );
       },
       loading: () {
-        if (cities.valueOrNull != null) {
-          return _buildSuggestions(cities.value!);
+        if(_lastResults.isNotEmpty) {
+          return _buildSuggestions(_lastResults);
         }
         return const SizedBox();
       },
@@ -238,7 +247,7 @@ class _SearchSuggestions extends ConsumerWidget {
       ),
       title: Text(city.name),
       subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
-      onTap: () => onSuggestionClicked(city),
+      onTap: () => widget.onSuggestionClicked(city),
     );
   }
 }
