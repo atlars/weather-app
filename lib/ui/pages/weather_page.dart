@@ -48,10 +48,11 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   Widget _buildNewSearchBar() {
     return GestureDetector(
       onTap: () async {
-        final result = await showSearch(context: context, delegate: SearchCityDelegate(ref));
+        final result = await showSearch(context: context, delegate: SearchCityDelegate());
         if (result != null) {
           setState(() => _selectedCity = result);
         }
+        ref.invalidate(searchCityProvider);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -153,9 +154,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 }
 
 class SearchCityDelegate extends SearchDelegate<City?> {
-  final WidgetRef ref;
-
-  SearchCityDelegate(this.ref)
+  SearchCityDelegate()
       : super(
           searchFieldLabel: "Search a city",
           searchFieldStyle: TextStyle(fontSize: 16, color: Colors.grey.shade800),
@@ -188,22 +187,47 @@ class SearchCityDelegate extends SearchDelegate<City?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    ref.invalidate(searchCityProvider);
+    return _SearchSuggestions(
+      query: query,
+      onSuggestionClicked: (city) {
+        close(context, city);
+      },
+    );
+  }
+}
 
-    return FutureBuilder(
-      future: ref.read(searchCityProvider(search: query.trim()).future),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView(
-            children: snapshot.data?.map((city) => _citySearchResult(city, context)).toList() ?? [],
-          );
+class _SearchSuggestions extends ConsumerWidget {
+  final String query;
+  final Function(City) onSuggestionClicked;
+
+  const _SearchSuggestions({required this.query, required this.onSuggestionClicked});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cities = ref.watch(searchCityProvider(search: query.trim()));
+    return cities.when(
+      data: (data) {
+        return _buildSuggestions(data);
+      },
+      error: (error, _) {
+        return const Center(
+          child: Text("Cannot fetch suggestions"),
+        );
+      },
+      loading: () {
+        if (cities.valueOrNull != null) {
+          return _buildSuggestions(cities.value!);
         }
-        return const CircularProgressIndicator();
+        return const SizedBox();
       },
     );
   }
 
-  Widget _citySearchResult(City city, BuildContext context) {
+  Widget _buildSuggestions(List<City> cities) {
+    return ListView(children: cities.map((city) => _buildCitySuggestion(city)).toList());
+  }
+
+  Widget _buildCitySuggestion(City city) {
     return ListTile(
       leading: Text(
         LocationUtils.countryCodeToEmoji(city.countryCode),
@@ -214,9 +238,7 @@ class SearchCityDelegate extends SearchDelegate<City?> {
       ),
       title: Text(city.name),
       subtitle: Text('${city.admin1 ?? ''}, ${city.country}'),
-      onTap: () {
-        close(context, city);
-      },
+      onTap: () => onSuggestionClicked(city),
     );
   }
 }

@@ -7,21 +7,14 @@ part 'location.g.dart';
 
 @riverpod
 Future<List<City>> searchCity(SearchCityRef ref, {String search = ""}) async {
+  if (search.isEmpty) return [];
+
   final cancelToken = ref.cancelToken();
   final locationRepository = ref.watch(locationRepostioryProvider);
 
-  if (search.isEmpty) return [];
+  ref.cacheFor(const Duration(minutes: 5));
+  
+  ref.onDispose(() => print("Dispose $search"));
 
-  final link = ref.keepAlive();
-  ref.onDispose(() {
-    link.close();
-  });
-
-  await Future<void>.delayed(const Duration(milliseconds: 250));
-
-  if (cancelToken.isCancelled) {
-    throw Exception('Cancelled');
-  }
-
-  return locationRepository.searchCity(name: search, count: 3, cancelToken: cancelToken);
+  return locationRepository.searchCity(name: search, count: 5, cancelToken: cancelToken);
 }
