@@ -8,6 +8,7 @@ import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/provider/weather.dart';
 import 'package:weather_app/ui/widgets/weather_item.dart';
 import 'package:weather_app/util/location.dart';
+import 'package:weather_app/util/pair.dart';
 
 class WeatherPage extends ConsumerStatefulWidget {
   const WeatherPage({super.key});
@@ -19,6 +20,7 @@ class WeatherPage extends ConsumerStatefulWidget {
 class _WeatherPageState extends ConsumerState<WeatherPage> {
   final SearchController _searchController = SearchController();
   City? _selectedCity;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -28,8 +30,13 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color(0xfff6f6f8),
         appBar: AppBar(
-            title: _buildNewSearchBar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
+          title: _buildNewSearchBar(),
+          shape: Border(
+            bottom: BorderSide(width: 1, color: Colors.grey.shade300),
+          ),
+        ),
         body: _buildWeather());
   }
 
@@ -73,7 +80,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     final city = _selectedCity!;
     final weatherResult = ref.watch(
       weatherProvider(
-        WeatherRequest(longitude: city.longitude, latitude: city.latitude, forecastHours: 24),
+        WeatherRequest(longitude: city.longitude, latitude: city.latitude, forecastHours: 7 * 24, forecastDays: 7),
       ),
     );
     return weatherResult.when(
@@ -102,36 +109,43 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   Widget _buildCurrentWeather(Weather weather, City city) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            city.name,
-            style: theme.textTheme.headlineLarge,
-          ),
-          Text(
-            '${weather.daily.minTemperatues.first}°/${weather.daily.maxTemperatues.first}°',
-            style: theme.textTheme.headlineMedium,
-          )
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.location_on_outlined,
+              size: 28,
+            ),
+            Text(
+              city.name,
+              style: theme.textTheme.headlineMedium,
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('${weather.daily.minTemperatues.last}°', style: theme.textTheme.headlineSmall),
+            const SizedBox(width: 3),
+            Text(
+              '${weather.daily.maxTemperatues.first}°',
+              style: theme.textTheme.headlineSmall?.copyWith(color: Colors.grey.shade400),
+            )
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildHourlyWeatherItems(Weather weather) {
-    const double horizontalPadding = 20;
-    const double gapSize = 15;
-    final items = _getHourlyWeatherItems(weather);
-    final widgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()..removeLast();
-    widgets.add(const SizedBox(width: horizontalPadding));
-    widgets.insert(0, const SizedBox(width: horizontalPadding));
-    return Row(children: widgets);
-  }
-
   List<Widget> _getHourlyWeatherItems(Weather weather) {
-    return weather.hourly.time.mapIndexed((index, time) {
+    final hourIndexes = weather.hourly.time.foldIndexed([], (index, acc, element) {
+      if(DateUtils.isSameDay(element, _selectedDate)) acc.add(index);
+      return acc;
+    });
+
+    return hourIndexes.map((index) {
       return Column(
         children: [
           Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
@@ -147,16 +161,75 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     }).toList();
   }
 
-  Widget _buildWeeklyWeather(Weather weather) {
-    return Container();
+  List<Widget> _getWeeklyWeatherItems(Weather weather) {
+    return weather.daily.time.mapIndexed((index, date) {
+      return GestureDetector(
+        onTap: () {
+          setState(() => _selectedDate = date);
+        },
+        child: Card(
+          elevation: 1,
+          margin: const EdgeInsets.symmetric(vertical: 3),
+          shadowColor: Colors.grey.shade200,
+          shape: RoundedRectangleBorder(
+                    side: DateUtils.isSameDay(_selectedDate, date)
+                ? BorderSide(color: Colors.blueAccent.shade200, width: 2)
+                : BorderSide.none,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                Text(DateFormat('E').format(date)),
+                WeatherItem(
+                  wmoCode: weather.daily.weatherCodes[index],
+                  minMaxTemperature: Pair(
+                    weather.daily.minTemperatues[index],
+                    weather.daily.maxTemperatues[index],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 
-  Widget _buildWeeklyWeatherItems(Weather weather) {
-    return Container();
+  Widget _buildWeeklyWeather(Weather weather) {
+    const double horizontalPadding = 14;
+    const double gapSize = 7;
+    final items = _getWeeklyWeatherItems(weather);
+    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
+      ..removeLast();
+    listWidgets.add(const SizedBox(width: horizontalPadding));
+    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: listWidgets,
+      ),
+    );
   }
 
   Widget _buildHourlyWeather(Weather weather) {
-    return SingleChildScrollView(scrollDirection: Axis.horizontal, child: _buildHourlyWeatherItems(weather));
+    const double horizontalPadding = 26;
+    const double gapSize = 15;
+
+    final items = _getHourlyWeatherItems(weather);
+    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
+      ..removeLast();
+    listWidgets.add(const SizedBox(width: horizontalPadding));
+    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: listWidgets,
+      ),
+    );
   }
 
   @override

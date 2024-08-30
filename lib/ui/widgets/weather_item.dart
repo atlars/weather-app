@@ -7,11 +7,7 @@ class WeatherItem extends StatelessWidget {
   final Pair<double, double>? minMaxTemperature;
   final double temperature;
 
-  const WeatherItem(
-      {this.minMaxTemperature,
-      required this.wmoCode,
-      this.temperature = 0.0,
-      super.key});
+  const WeatherItem({this.minMaxTemperature, required this.wmoCode, this.temperature = 0.0, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +21,31 @@ class WeatherItem extends StatelessWidget {
             fontFamily: "NotoColorEmoji",
           ),
         ),
-        _buildTemperature()
+        _buildTemperature(context)
       ],
     );
   }
 
-  Widget _buildTemperature() {
+  Widget _buildTemperature(BuildContext context) {
+    final theme = Theme.of(context);
     if (minMaxTemperature != null) {
-      return Text('${minMaxTemperature!.first}°/${minMaxTemperature!.last}°', style: const TextStyle(fontWeight: FontWeight.w100),);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${minMaxTemperature!.last.toInt()}°',
+            style: const TextStyle(fontWeight: FontWeight.w400),
+          ),
+          const SizedBox(width: 3),
+          Text(
+            '${minMaxTemperature!.first.toInt()}°',
+            style: TextStyle(
+              fontWeight: FontWeight.w400,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      );
     }
     return Text('$temperature°', style: const TextStyle(fontWeight: FontWeight.w500));
   }
