@@ -51,9 +51,10 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
       },
       child: Container(
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: Colors.transparent),
-            color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(color: Colors.transparent),
+          color: Colors.grey.shade200,
+        ),
         padding: const EdgeInsets.all(8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,39 +110,55 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   Widget _buildCurrentWeather(Weather weather, City city) {
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: Container(
+        padding: EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue.shade50,
+              Colors.blue.shade100,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 28,
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 28,
+                ),
+                Text(
+                  city.name,
+                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
+              ],
             ),
-            Text(
-              city.name,
-              style: theme.textTheme.headlineMedium,
+            Row(
+              children: [
+                Text('${weather.daily.minTemperatues.last}°', style: theme.textTheme.headlineSmall),
+                const SizedBox(width: 3),
+                Text(
+                  '${weather.daily.maxTemperatues.first}°',
+                  style: theme.textTheme.headlineSmall?.copyWith(color: Colors.grey.shade500),
+                )
+              ],
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('${weather.daily.minTemperatues.last}°', style: theme.textTheme.headlineSmall),
-            const SizedBox(width: 3),
-            Text(
-              '${weather.daily.maxTemperatues.first}°',
-              style: theme.textTheme.headlineSmall?.copyWith(color: Colors.grey.shade400),
-            )
-          ],
-        ),
-      ],
+      ),
     );
   }
 
   List<Widget> _getHourlyWeatherItems(Weather weather) {
     final hourIndexes = weather.hourly.time.foldIndexed([], (index, acc, element) {
-      if(DateUtils.isSameDay(element, _selectedDate)) acc.add(index);
+      if (DateUtils.isSameDay(element, _selectedDate)) acc.add(index);
       return acc;
     });
 
@@ -172,7 +189,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
           margin: const EdgeInsets.symmetric(vertical: 3),
           shadowColor: Colors.grey.shade200,
           shape: RoundedRectangleBorder(
-                    side: DateUtils.isSameDay(_selectedDate, date)
+            side: DateUtils.isSameDay(_selectedDate, date)
                 ? BorderSide(color: Colors.blueAccent.shade200, width: 2)
                 : BorderSide.none,
             borderRadius: BorderRadius.circular(10),
