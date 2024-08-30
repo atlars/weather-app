@@ -32,8 +32,8 @@ class WeatherItem extends StatelessWidget {
 
   Widget _buildTemperature() {
     if (minMaxTemperature != null) {
-      return Text('${minMaxTemperature!.first}°/${minMaxTemperature!.last}°');
+      return Text('${minMaxTemperature!.first}°/${minMaxTemperature!.last}°', style: const TextStyle(fontWeight: FontWeight.w100),);
     }
-    return Text('$temperature°');
+    return Text('$temperature°', style: const TextStyle(fontWeight: FontWeight.w500));
   }
 }

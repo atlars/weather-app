@@ -28,21 +28,9 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: _buildNewSearchBar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Stack(
-          children: [
-            if (_selectedCity != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 62, left: 10, right: 10),
-                child: _buildWeather(),
-              ),
-          ],
-        ),
-      ),
-    );
+        appBar: AppBar(
+            title: _buildNewSearchBar(), shape: Border(bottom: BorderSide(width: 1, color: Colors.grey.shade300))),
+        body: _buildWeather());
   }
 
   Widget _buildNewSearchBar() {
@@ -81,6 +69,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   }
 
   Widget _buildWeather() {
+    if (_selectedCity == null) return const SizedBox();
     final city = _selectedCity!;
     final weatherResult = ref.watch(
       weatherProvider(
@@ -92,15 +81,19 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 22),
             _buildCurrentWeather(weather, city),
+            const SizedBox(height: 22),
             _buildHourlyWeather(weather),
+            const SizedBox(height: 22),
+            _buildWeeklyWeather(weather)
           ],
         );
       },
       error: (error, stacktrace) => const Text("Error"),
       loading: () => const Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 22),
+          padding: EdgeInsets.symmetric(vertical: 20),
           child: CircularProgressIndicator(),
         ),
       ),
@@ -109,41 +102,61 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   Widget _buildCurrentWeather(Weather weather, City city) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          city.name,
-          style: theme.textTheme.headlineLarge,
-        ),
-        Text(
-          '${weather.daily.minTemperatues.first}°/${weather.daily.maxTemperatues.first}°',
-          style: theme.textTheme.headlineMedium,
-        )
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            city.name,
+            style: theme.textTheme.headlineLarge,
+          ),
+          Text(
+            '${weather.daily.minTemperatues.first}°/${weather.daily.maxTemperatues.first}°',
+            style: theme.textTheme.headlineMedium,
+          )
+        ],
+      ),
     );
   }
 
+  Widget _buildHourlyWeatherItems(Weather weather) {
+    const double horizontalPadding = 20;
+    const double gapSize = 15;
+    final items = _getHourlyWeatherItems(weather);
+    final widgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()..removeLast();
+    widgets.add(const SizedBox(width: horizontalPadding));
+    widgets.insert(0, const SizedBox(width: horizontalPadding));
+    return Row(children: widgets);
+  }
+
+  List<Widget> _getHourlyWeatherItems(Weather weather) {
+    return weather.hourly.time.mapIndexed((index, time) {
+      return Column(
+        children: [
+          Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
+          const SizedBox(
+            height: 12,
+          ),
+          WeatherItem(
+            wmoCode: weather.hourly.weatherCodes[index],
+            temperature: weather.hourly.temperatues[index],
+          )
+        ],
+      );
+    }).toList();
+  }
+
+  Widget _buildWeeklyWeather(Weather weather) {
+    return Container();
+  }
+
+  Widget _buildWeeklyWeatherItems(Weather weather) {
+    return Container();
+  }
+
   Widget _buildHourlyWeather(Weather weather) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: weather.hourly.time.mapIndexed((index, time) {
-          return Column(
-            children: [
-              Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
-              const SizedBox(
-                height: 12,
-              ),
-              WeatherItem(
-                wmoCode: weather.hourly.weatherCodes[index],
-                temperature: weather.hourly.temperatues[index],
-              ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
+    return SingleChildScrollView(scrollDirection: Axis.horizontal, child: _buildHourlyWeatherItems(weather));
   }
 
   @override
@@ -154,7 +167,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 }
 
 class SearchCityDelegate extends SearchDelegate<City?> {
-
   SearchCityDelegate()
       : super(
           searchFieldLabel: "Search a city",
@@ -215,7 +227,7 @@ class _SearchSuggestionsState extends ConsumerState<_SearchSuggestions> {
     final cities = ref.watch(searchCityProvider(search: widget.query.trim()));
     return cities.when(
       data: (data) {
-        if(data.isNotEmpty) _lastResults = [...data];
+        if (data.isNotEmpty) _lastResults = [...data];
         return _buildSuggestions(data);
       },
       error: (error, _) {
@@ -224,7 +236,7 @@ class _SearchSuggestionsState extends ConsumerState<_SearchSuggestions> {
         );
       },
       loading: () {
-        if(_lastResults.isNotEmpty) {
+        if (_lastResults.isNotEmpty) {
           return _buildSuggestions(_lastResults);
         }
         return const SizedBox();
