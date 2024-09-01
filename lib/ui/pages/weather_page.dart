@@ -1,14 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:weather_app/models/location.dart';
-import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/provider/location.dart';
-import 'package:weather_app/provider/weather.dart';
-import 'package:weather_app/ui/widgets/weather_item.dart';
+import 'package:weather_app/ui/widgets/weather_overview.dart';
 import 'package:weather_app/util/location.dart';
-import 'package:weather_app/util/pair.dart';
 
 class WeatherPage extends ConsumerStatefulWidget {
   const WeatherPage({super.key});
@@ -20,7 +15,6 @@ class WeatherPage extends ConsumerStatefulWidget {
 class _WeatherPageState extends ConsumerState<WeatherPage> {
   final SearchController _searchController = SearchController();
   City? _selectedCity;
-  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -30,14 +24,15 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xfff6f6f8),
-        appBar: AppBar(
-          title: _buildNewSearchBar(),
-          shape: Border(
-            bottom: BorderSide(width: 1, color: Colors.grey.shade300),
-          ),
+      backgroundColor: const Color(0xfff6f6f8),
+      appBar: AppBar(
+        title: _buildNewSearchBar(),
+        shape: Border(
+          bottom: BorderSide(width: 1, color: Colors.grey.shade300),
         ),
-        body: _buildWeather());
+      ),
+      body: _selectedCity != null ? WeatherOverview(city: _selectedCity!) : const SizedBox(),
+    );
   }
 
   Widget _buildNewSearchBar() {
@@ -72,179 +67,6 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildWeather() {
-    if (_selectedCity == null) return const SizedBox();
-    final city = _selectedCity!;
-    final weatherResult = ref.watch(
-      weatherProvider(
-        WeatherRequest(longitude: city.longitude, latitude: city.latitude, forecastHours: 7 * 24, forecastDays: 7),
-      ),
-    );
-    return weatherResult.when(
-      data: (weather) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 22),
-            _buildCurrentWeather(weather, city),
-            const SizedBox(height: 22),
-            _buildHourlyWeather(weather),
-            const SizedBox(height: 22),
-            _buildWeeklyWeather(weather)
-          ],
-        );
-      },
-      error: (error, stacktrace) => const Text("Error"),
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrentWeather(Weather weather, City city) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      child: Container(
-        padding: EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.blue.shade100,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 28,
-                ),
-                Text(
-                  city.name,
-                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Text('${weather.daily.minTemperatues.last}°', style: theme.textTheme.headlineSmall),
-                const SizedBox(width: 3),
-                Text(
-                  '${weather.daily.maxTemperatues.first}°',
-                  style: theme.textTheme.headlineSmall?.copyWith(color: Colors.grey.shade500),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _getHourlyWeatherItems(Weather weather) {
-    final hourIndexes = weather.hourly.time.foldIndexed([], (index, acc, element) {
-      if (DateUtils.isSameDay(element, _selectedDate)) acc.add(index);
-      return acc;
-    });
-
-    return hourIndexes.map((index) {
-      return Column(
-        children: [
-          Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
-          const SizedBox(
-            height: 12,
-          ),
-          WeatherItem(
-            wmoCode: weather.hourly.weatherCodes[index],
-            temperature: weather.hourly.temperatues[index],
-          )
-        ],
-      );
-    }).toList();
-  }
-
-  List<Widget> _getWeeklyWeatherItems(Weather weather) {
-    return weather.daily.time.mapIndexed((index, date) {
-      return GestureDetector(
-        onTap: () {
-          setState(() => _selectedDate = date);
-        },
-        child: Card(
-          elevation: 1,
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          shadowColor: Colors.grey.shade200,
-          shape: RoundedRectangleBorder(
-            side: DateUtils.isSameDay(_selectedDate, date)
-                ? BorderSide(color: Colors.blueAccent.shade200, width: 2)
-                : BorderSide.none,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Text(DateFormat('E').format(date)),
-                WeatherItem(
-                  wmoCode: weather.daily.weatherCodes[index],
-                  minMaxTemperature: Pair(
-                    weather.daily.minTemperatues[index],
-                    weather.daily.maxTemperatues[index],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  Widget _buildWeeklyWeather(Weather weather) {
-    const double horizontalPadding = 14;
-    const double gapSize = 7;
-    final items = _getWeeklyWeatherItems(weather);
-    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
-      ..removeLast();
-    listWidgets.add(const SizedBox(width: horizontalPadding));
-    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: listWidgets,
-      ),
-    );
-  }
-
-  Widget _buildHourlyWeather(Weather weather) {
-    const double horizontalPadding = 26;
-    const double gapSize = 15;
-
-    final items = _getHourlyWeatherItems(weather);
-    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
-      ..removeLast();
-    listWidgets.add(const SizedBox(width: horizontalPadding));
-    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: listWidgets,
       ),
     );
   }
