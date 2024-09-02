@@ -34,8 +34,10 @@ class WeatherOverview extends HookConsumerWidget {
             const SizedBox(height: 22),
             _buildCurrentWeather(weather, city, context),
             const SizedBox(height: 22),
-            _buildHourlyWeather(weather, selectedDate),
-            const SizedBox(height: 22),
+            _buildTabBar(tabController, context),
+            const SizedBox(height: 14),
+            _buildTabBarContent(tabController, weather, selectedDate),
+            const SizedBox(height: 14),
             _buildWeeklyWeather(weather, selectedDate)
           ],
         );
@@ -50,14 +52,94 @@ class WeatherOverview extends HookConsumerWidget {
     );
   }
 
-  Widget _buildTabBar(TabController tabController) {
-    return TabBar(
-      controller: tabController,
-      tabs: [
-        Tab(icon: Icon(Icons.thermostat)),
-        Tab(icon: Icon(Icons.water_drop_outlined)),
-        Tab(icon: Icon(Icons.wind_power_rounded)),
-      ],
+  Widget _buildTabBarContent(TabController tabController, Weather weather, ValueNotifier<DateTime> selectedDate) {
+    return Container(
+      height: 100,
+      child: TabBarView(
+        controller: tabController,
+        children: [
+          _buildHourlyWeather(weather, selectedDate),
+          Tab(icon: Icon(Icons.water_drop_outlined)),
+          Tab(icon: Icon(Icons.wind_power_rounded)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBar(TabController tabController, BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: TabBar(
+        dividerColor: Colors.transparent,
+        unselectedLabelColor: Colors.black,
+        indicatorSize: TabBarIndicatorSize.label,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: theme.cardColor,
+          border: Border.all(color: Colors.grey.shade300, width: 1),
+        ),
+        indicatorPadding: EdgeInsets.symmetric(vertical: 4),
+        enableFeedback: false,
+        labelColor: Colors.black87,
+        controller: tabController,
+        labelStyle: theme.textTheme.labelSmall,
+        labelPadding: EdgeInsets.zero,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+        tabs: const [
+          Tab(
+            child: IntrinsicWidth(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.thermostat,
+                      color: Colors.black87,
+                    ),
+                    Text("Temperature")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: IntrinsicWidth(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.wind_power,
+                      color: Colors.black87,
+                    ),
+                    Text("Wind")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: IntrinsicWidth(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.water_drop,
+                      color: Colors.black87,
+                    ),
+                    Text("Rain")
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
