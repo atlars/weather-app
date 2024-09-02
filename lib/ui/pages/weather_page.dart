@@ -24,7 +24,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 246, 251, 253),
+      backgroundColor: const Color.fromARGB(255, 251, 253, 253),
       appBar: AppBar(
         title: _buildNewSearchBar(),
         shape: Border(

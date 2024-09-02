@@ -7,7 +7,7 @@ part 'theme.g.dart';
 @riverpod
 TextTheme textTheme(TextThemeRef ref) {
   return const TextTheme(
-    headlineLarge: TextStyle(fontSize: 38)
+    headlineLarge: TextStyle(fontSize: 38),
   );
 }
 
@@ -18,6 +18,8 @@ ThemeData darkTheme(DarkThemeRef ref) {
     colorScheme: const ColorScheme.highContrastDark(),
     textTheme: textTheme,
     useMaterial3: true,
+  ).copyWith(
+    iconTheme: const IconThemeData(color: Colors.white),
   );
 }
 
@@ -28,6 +30,8 @@ ThemeData lightTheme(LightThemeRef ref) {
     colorScheme: const ColorScheme.highContrastLight(),
     textTheme: textTheme,
     useMaterial3: true,
+  ).copyWith(
+    iconTheme: const IconThemeData(color: Color.fromARGB(255, 58, 58, 58)),
   );
 }
 

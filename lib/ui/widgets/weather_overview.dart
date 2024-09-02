@@ -53,14 +53,14 @@ class WeatherOverview extends HookConsumerWidget {
   }
 
   Widget _buildTabBarContent(TabController tabController, Weather weather, ValueNotifier<DateTime> selectedDate) {
-    return Container(
+    return SizedBox(
       height: 100,
       child: TabBarView(
         controller: tabController,
         children: [
           _buildHourlyWeather(weather, selectedDate),
-          Tab(icon: Icon(Icons.water_drop_outlined)),
-          Tab(icon: Icon(Icons.wind_power_rounded)),
+          const Tab(icon: Icon(Icons.water_drop_outlined)),
+          const Tab(icon: Icon(Icons.wind_power_rounded)),
         ],
       ),
     );
@@ -88,24 +88,23 @@ class WeatherOverview extends HookConsumerWidget {
         ),
         indicatorPadding: const EdgeInsets.symmetric(vertical: 4),
         enableFeedback: false,
-        labelColor: Colors.black87,
         controller: tabController,
         labelStyle: theme.textTheme.labelSmall,
         labelPadding: EdgeInsets.zero,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
-        tabs: const [
+        tabs: [
           Tab(
             child: IntrinsicWidth(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.thermostat,
-                      color: Colors.black87,
+                      color: theme.iconTheme.color,
                     ),
-                    Text("Temperature")
+                    const Text("Temperature"),
                   ],
                 ),
               ),
@@ -114,15 +113,15 @@ class WeatherOverview extends HookConsumerWidget {
           Tab(
             child: IntrinsicWidth(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.wind_power,
-                      color: Colors.black87,
+                      color: theme.iconTheme.color,
                     ),
-                    Text("Wind")
+                    const Text("Wind")
                   ],
                 ),
               ),
@@ -131,15 +130,15 @@ class WeatherOverview extends HookConsumerWidget {
           Tab(
             child: IntrinsicWidth(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.water_drop,
-                      color: Colors.black87,
+                      color: theme.iconTheme.color,
                     ),
-                    Text("Rain")
+                    const Text("Rain")
                   ],
                 ),
               ),
@@ -153,9 +152,9 @@ class WeatherOverview extends HookConsumerWidget {
   Widget _buildCurrentWeather(Weather weather, City city, BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Container(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
