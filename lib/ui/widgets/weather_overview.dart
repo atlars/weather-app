@@ -77,9 +77,16 @@ class WeatherOverview extends HookConsumerWidget {
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: theme.cardColor,
-          border: Border.all(color: Colors.grey.shade300, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade400.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        indicatorPadding: EdgeInsets.symmetric(vertical: 4),
+        indicatorPadding: const EdgeInsets.symmetric(vertical: 4),
         enableFeedback: false,
         labelColor: Colors.black87,
         controller: tabController,
