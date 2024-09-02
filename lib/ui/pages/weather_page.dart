@@ -14,7 +14,6 @@ class WeatherPage extends ConsumerStatefulWidget {
 
 class _WeatherPageState extends ConsumerState<WeatherPage> {
   final SearchController _searchController = SearchController();
-  City? _selectedCity;
 
   @override
   void initState() {
@@ -23,24 +22,34 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedCity = ref.watch(selectedCityProvider);
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 251, 253, 253),
       appBar: AppBar(
-        title: _buildNewSearchBar(),
+        title: _buildNewSearchBar(selectedCity.valueOrNull),
         shape: Border(
           bottom: BorderSide(width: 1, color: Colors.grey.shade300),
         ),
       ),
-      body: _selectedCity != null ? WeatherOverview(city: _selectedCity!) : const SizedBox(),
+      body: selectedCity.when(
+        data: (data) {
+          return data != null ? WeatherOverview(city: data) : const SizedBox();
+        },
+        error: (stacktrace, error) {
+          return Text("Error getting current city");
+        },
+        loading: () => CircularProgressIndicator(),
+      ),
     );
   }
 
-  Widget _buildNewSearchBar() {
+  Widget _buildNewSearchBar(City? selectedCity) {
     return GestureDetector(
       onTap: () async {
         final result = await showSearch(context: context, delegate: SearchCityDelegate());
         if (result != null) {
-          setState(() => _selectedCity = result);
+          ref.read(selectedCityProvider.notifier).set(result);
         }
         ref.invalidate(searchCityProvider);
       },
@@ -62,7 +71,7 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
               width: 8,
             ),
             Text(
-              _selectedCity?.name ?? "Search",
+              selectedCity?.name ?? "Search",
               style: const TextStyle(fontSize: 14),
             ),
           ],

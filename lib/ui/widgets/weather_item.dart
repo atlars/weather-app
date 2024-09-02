@@ -27,7 +27,6 @@ class WeatherItem extends StatelessWidget {
   }
 
   Widget _buildTemperature(BuildContext context) {
-    final theme = Theme.of(context);
     if (minMaxTemperature != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,

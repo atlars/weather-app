@@ -28,6 +28,7 @@ class _EagerInitialization extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Providers that are initialized eagerly
     final values = [
       ref.watch(prefsProvider),
     ];

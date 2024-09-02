@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weather_app/constants/prefs.dart';
 import 'package:weather_app/models/location.dart';
+import 'package:weather_app/provider/prefs.dart';
 import 'package:weather_app/repositories/location.dart';
 import 'package:weather_app/util/extensions.dart';
 
@@ -24,4 +28,39 @@ Future<List<City>> searchCity(SearchCityRef ref, {String search = ""}) async {
   ref.cacheFor(const Duration(minutes: 5));
 
   return result;
+}
+
+@riverpod
+class FavoriteCities extends _$FavoriteCities {
+  @override
+  Future<List<City>> build() async {
+    final prefs = ref.watch(prefsProvider).requireValue;
+    final rawCities = prefs.getStringList(PrefsKeys.favoriteCities) ?? [];
+    final cities = rawCities.map((cityString) => City.fromJson(jsonDecode(cityString))).toList();
+
+    return cities;
+  }
+}
+
+@riverpod
+class SelectedCity extends _$SelectedCity {
+  @override
+  Future<City?> build() async {
+    final prefs = ref.watch(prefsProvider).requireValue;
+    final rawCity = prefs.getString(PrefsKeys.selectedCity) ?? "";
+    if (rawCity.isEmpty) return null;
+
+    return City.fromJson(jsonDecode(rawCity));
+  }
+
+  void set(City? city) {
+    final prefs = ref.read(prefsProvider).requireValue;
+    if (city == null) {
+      prefs.remove(PrefsKeys.selectedCity);
+    } else {
+      prefs.setString(PrefsKeys.selectedCity, jsonEncode(city.toJson()));
+    }
+
+    ref.invalidateSelf();
+  }
 }
