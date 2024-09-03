@@ -1,39 +1,37 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/provider/weather.dart';
 import 'package:weather_app/ui/views/search_city.dart';
-import 'package:weather_app/ui/widgets/weather_item.dart';
-import 'package:weather_app/util/pair.dart';
+import 'package:weather_app/ui/widgets/daily_weather_list.dart';
+import 'package:weather_app/ui/widgets/hourly_weather_list.dart';
 
 class WeatherPage extends HookConsumerWidget {
   const WeatherPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabController = useTabController(initialLength: 3);
     final selectedCity = ref.watch(selectedCityProvider);
 
     return Scaffold(
       body: selectedCity.when(
         data: (data) {
           if (data != null) {
-            return _buildWeather(data, ref, context, tabController);
+            return _buildWeather(data, ref, context);
           }
-          return Text("Add a city");
+          return const Text("Add a city");
         },
         error: (error, stacktrace) => Text("Could not load selected City"),
-        loading: () => CircularProgressIndicator(),
+        loading: () => const CircularProgressIndicator(),
       ),
     );
   }
 
-  Widget _buildWeather(City city, WidgetRef ref, BuildContext context, TabController tabController) {
+  Widget _buildWeather(City city, WidgetRef ref, BuildContext context) {
+    final tabController = useTabController(initialLength: 3);
     final selectedDate = useState(DateTime.now());
     final weatherResult = ref.watch(
       weatherProvider(
@@ -70,7 +68,12 @@ class WeatherPage extends HookConsumerWidget {
                         const SizedBox(height: 14),
                         _buildTabBarContent(tabController, weather, selectedDate),
                         const SizedBox(height: 14),
-                        _buildWeeklyWeather(weather, selectedDate)
+                        DailyWeatherList(
+                          weatherData: weather.daily,
+                          onDaySelected: (date) {
+                            selectedDate.value = date;
+                          },
+                        )
                       ],
                     ),
                   ),
@@ -96,7 +99,7 @@ class WeatherPage extends HookConsumerWidget {
       child: TabBarView(
         controller: tabController,
         children: [
-          _buildHourlyWeather(weather, selectedDate),
+          HourlyWeatherList(weatherData: weather.hourly, day: selectedDate.value),
           const Tab(icon: Icon(Icons.water_drop_outlined)),
           const Tab(icon: Icon(Icons.wind_power_rounded)),
         ],
@@ -232,100 +235,6 @@ class WeatherPage extends HookConsumerWidget {
           ),
         )
       ],
-    );
-  }
-
-  List<Widget> _getHourlyWeatherItems(Weather weather, ValueNotifier<DateTime> selectedDate) {
-    final hourIndexes = weather.hourly.time.foldIndexed(
-      [],
-      (index, acc, element) {
-        if (DateUtils.isSameDay(element, selectedDate.value)) acc.add(index);
-        return acc;
-      },
-    );
-
-    return hourIndexes.map((index) {
-      return Column(
-        children: [
-          Text(DateFormat('HH:mm').format(weather.hourly.time[index])),
-          const SizedBox(
-            height: 12,
-          ),
-          WeatherItem(
-            wmoCode: weather.hourly.weatherCodes[index],
-            temperature: weather.hourly.temperatues[index],
-          )
-        ],
-      );
-    }).toList();
-  }
-
-  List<Widget> _getWeeklyWeatherItems(Weather weather, ValueNotifier<DateTime> selectedDate) {
-    return weather.daily.time.mapIndexed((index, date) {
-      return GestureDetector(
-        onTap: () => selectedDate.value = date,
-        child: Card(
-          elevation: 1,
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          shadowColor: Colors.grey.shade200,
-          shape: RoundedRectangleBorder(
-            side: DateUtils.isSameDay(selectedDate.value, date)
-                ? BorderSide(color: Colors.blueAccent.shade200, width: 1)
-                : BorderSide.none,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Text(DateFormat('E').format(date)),
-                WeatherItem(
-                  wmoCode: weather.daily.weatherCodes[index],
-                  minMaxTemperature: Pair(
-                    weather.daily.minTemperatues[index],
-                    weather.daily.maxTemperatues[index],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  Widget _buildWeeklyWeather(Weather weather, ValueNotifier<DateTime> selectedDate) {
-    const double horizontalPadding = 14;
-    const double gapSize = 7;
-    final items = _getWeeklyWeatherItems(weather, selectedDate);
-    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
-      ..removeLast();
-    listWidgets.add(const SizedBox(width: horizontalPadding));
-    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: listWidgets,
-      ),
-    );
-  }
-
-  Widget _buildHourlyWeather(Weather weather, ValueNotifier<DateTime> selectedDate) {
-    const double horizontalPadding = 26;
-    const double gapSize = 15;
-
-    final items = _getHourlyWeatherItems(weather, selectedDate);
-    final listWidgets = items.expandIndexed((index, item) => [item, const SizedBox(width: gapSize)]).toList()
-      ..removeLast();
-    listWidgets.add(const SizedBox(width: horizontalPadding));
-    listWidgets.insert(0, const SizedBox(width: horizontalPadding));
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: listWidgets,
-      ),
     );
   }
 }
