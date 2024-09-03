@@ -5,7 +5,7 @@ import 'package:weather_app/models/location.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/provider/weather.dart';
-import 'package:weather_app/ui/views/search_city.dart';
+import 'package:weather_app/ui/pages/favorite_cities_page.dart';
 import 'package:weather_app/ui/widgets/daily_weather_list.dart';
 import 'package:weather_app/ui/widgets/hourly_weather_list.dart';
 
@@ -17,15 +17,27 @@ class WeatherPage extends HookConsumerWidget {
     final selectedCity = ref.watch(selectedCityProvider);
 
     return Scaffold(
-      body: selectedCity.when(
-        data: (data) {
-          if (data != null) {
-            return _buildWeather(data, ref, context);
-          }
-          return const Text("Add a city");
-        },
-        error: (error, stacktrace) => Text("Could not load selected City"),
-        loading: () => const CircularProgressIndicator(),
+      body: selectedCity != null ? _buildWeather(selectedCity, ref, context) : _buildNoCitySelected(context),
+    );
+  }
+
+  Widget _buildNoCitySelected(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("No city selected"),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FavoriteCitiesPage()));
+            },
+            child: const Text("Add"),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+          )
+        ],
       ),
     );
   }
@@ -221,15 +233,11 @@ class WeatherPage extends HookConsumerWidget {
         ),
         const Spacer(),
         IconButton(
-          onPressed: () async {
-            final result = await showSearch(context: context, delegate: SearchCityDelegate());
-            if (result != null) {
-              ref.read(selectedCityProvider.notifier).set(result);
-            }
-            ref.invalidate(searchCityProvider);
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FavoriteCitiesPage()));
           },
           icon: const Icon(
-            Icons.search,
+            Icons.menu_sharp,
             color: Color(0xff2b5d98),
             size: 28,
           ),

@@ -33,19 +33,35 @@ Future<List<City>> searchCity(SearchCityRef ref, {String search = ""}) async {
 @riverpod
 class FavoriteCities extends _$FavoriteCities {
   @override
-  Future<List<City>> build() async {
+  List<City> build() {
     final prefs = ref.watch(prefsProvider).requireValue;
     final rawCities = prefs.getStringList(PrefsKeys.favoriteCities) ?? [];
     final cities = rawCities.map((cityString) => City.fromJson(jsonDecode(cityString))).toList();
 
     return cities;
   }
+
+  void saveData() {
+    final prefs = ref.read(prefsProvider).requireValue;
+    prefs.setStringList(PrefsKeys.favoriteCities, state.map((city) => jsonEncode(city.toJson())).toList());
+  }
+
+  void remove(City city) {
+    state.removeWhere((item) => item.id == city.id);
+    state = [...state];
+    saveData();
+  }
+
+  void add(City city) {
+    state = [city, ...state];
+    saveData();
+  }
 }
 
 @riverpod
 class SelectedCity extends _$SelectedCity {
   @override
-  Future<City?> build() async {
+  City? build() {
     final prefs = ref.watch(prefsProvider).requireValue;
     final rawCity = prefs.getString(PrefsKeys.selectedCity) ?? "";
     if (rawCity.isEmpty) return null;
