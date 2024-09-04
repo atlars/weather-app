@@ -31,11 +31,11 @@ class WeatherPage extends HookConsumerWidget {
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FavoriteCitiesPage()));
             },
-            child: const Text("Add"),
             style: TextButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
             ),
+            child: const Text("Add"),
           )
         ],
       ),
@@ -63,7 +63,7 @@ class WeatherPage extends HookConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 200),
+                const SizedBox(height: 240),
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(
@@ -95,7 +95,10 @@ class WeatherPage extends HookConsumerWidget {
           ],
         );
       },
-      error: (error, stacktrace) => const Text("Error"),
+      error: (error, stacktrace) {
+        print(stacktrace.toString());
+        return const Center(child: Text("Error"));
+      },
       loading: () => const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
@@ -126,12 +129,12 @@ class WeatherPage extends HookConsumerWidget {
       child: TabBar(
         dividerColor: Colors.transparent,
         unselectedLabelColor: Colors.black,
-        indicatorSize: TabBarIndicatorSize.label,
+        indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.grey.shade200,
         ),
-        indicatorPadding: const EdgeInsets.symmetric(vertical: 4),
+        indicatorPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         enableFeedback: false,
         controller: tabController,
         labelStyle: theme.textTheme.labelSmall,
@@ -139,58 +142,54 @@ class WeatherPage extends HookConsumerWidget {
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         tabs: [
           Tab(
-            child: IntrinsicWidth(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.thermostat,
-                      color: theme.iconTheme.color,
-                    ),
-                    const Text("Temperature"),
-                  ],
-                ),
+            child: RichText(
+              text: const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Icon(Icons.thermostat, size: 16),
+                    alignment: PlaceholderAlignment.middle,
+                  ),
+                  TextSpan(
+                    text: ' Temperature',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
             ),
           ),
           Tab(
-            child: IntrinsicWidth(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.wind_power,
-                      color: theme.iconTheme.color,
-                    ),
-                    const Text("Wind")
-                  ],
-                ),
+            child: RichText(
+              text: const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Icon(Icons.water_drop, size: 16),
+                    alignment: PlaceholderAlignment.middle,
+                  ),
+                  TextSpan(
+                    text: ' Rain',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
             ),
           ),
           Tab(
-            child: IntrinsicWidth(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.water_drop,
-                      color: theme.iconTheme.color,
-                    ),
-                    const Text("Rain")
-                  ],
-                ),
+            child: RichText(
+              text: const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Icon(Icons.air, size: 16),
+                    alignment: PlaceholderAlignment.middle,
+                  ),
+                  TextSpan(
+                    text: ' Wind',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ],      ),
     );
   }
 
