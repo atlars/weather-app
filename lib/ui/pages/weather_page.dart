@@ -96,7 +96,6 @@ class WeatherPage extends HookConsumerWidget {
         );
       },
       error: (error, stacktrace) {
-        print(stacktrace.toString());
         return const Center(child: Text("Error"));
       },
       loading: () => const Center(
