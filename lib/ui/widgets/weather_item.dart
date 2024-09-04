@@ -33,7 +33,7 @@ class WeatherItem extends StatelessWidget {
         children: [
           Text(
             '${minMaxTemperature!.last.toInt()}°',
-            style: const TextStyle(fontWeight: FontWeight.w400),
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 3),
           Text(

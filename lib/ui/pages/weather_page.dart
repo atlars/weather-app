@@ -43,6 +43,7 @@ class WeatherPage extends HookConsumerWidget {
   }
 
   Widget _buildWeather(City city, WidgetRef ref, BuildContext context) {
+    final theme = Theme.of(context);
     final tabController = useTabController(initialLength: 3);
     final selectedDate = useState(DateTime.now());
     final weatherResult = ref.watch(
@@ -66,8 +67,8 @@ class WeatherPage extends HookConsumerWidget {
                 const SizedBox(height: 240),
                 Expanded(
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
@@ -127,68 +128,49 @@ class WeatherPage extends HookConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: TabBar(
         dividerColor: Colors.transparent,
-        unselectedLabelColor: Colors.black,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.grey.shade200,
+          color: theme.colorScheme.surfaceContainerHighest,
         ),
-        indicatorPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        indicatorPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         enableFeedback: false,
         controller: tabController,
-        labelStyle: theme.textTheme.labelSmall,
         labelPadding: EdgeInsets.zero,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
-        tabs: [
+        tabs: const [
           Tab(
-            child: RichText(
-              text: const TextSpan(
-                children: [
-                  WidgetSpan(
-                    child: Icon(Icons.thermostat, size: 16),
-                    alignment: PlaceholderAlignment.middle,
-                  ),
-                  TextSpan(
-                    text: ' Temperature',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.thermostat, size: 16),
+                SizedBox(width: 2),
+                Text('Temperature'),
+              ],
             ),
           ),
           Tab(
-            child: RichText(
-              text: const TextSpan(
-                children: [
-                  WidgetSpan(
-                    child: Icon(Icons.water_drop, size: 16),
-                    alignment: PlaceholderAlignment.middle,
-                  ),
-                  TextSpan(
-                    text: ' Rain',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.water_drop, size: 16),
+                SizedBox(width: 2),
+                Text('Rain'),
+              ],
             ),
           ),
           Tab(
-            child: RichText(
-              text: const TextSpan(
-                children: [
-                  WidgetSpan(
-                    child: Icon(Icons.air, size: 16),
-                    alignment: PlaceholderAlignment.middle,
-                  ),
-                  TextSpan(
-                    text: ' Wind',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.air, size: 16),
+                SizedBox(width: 2),
+                Text('Wind'),
+              ],
             ),
           ),
-        ],      ),
+        ],
+      ),
     );
   }
 

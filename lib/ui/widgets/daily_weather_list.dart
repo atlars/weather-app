@@ -27,7 +27,7 @@ class DailyWeatherList extends HookWidget {
   Widget build(BuildContext context) {
     final selectedDate = useState(initialDate ?? DateTime.now());
 
-    final items = _getWeahterItems(selectedDate);
+    final items = _getWeahterItems(selectedDate, context);
     final listWidgets = items.expandIndexed((index, item) => [item, SizedBox(width: itemGapSize)]).toList()
       ..removeLast();
     listWidgets.add(SizedBox(width: horizontalPadding));
@@ -41,7 +41,8 @@ class DailyWeatherList extends HookWidget {
     );
   }
 
-  List<Widget> _getWeahterItems(ValueNotifier<DateTime> selectedDate) {
+  List<Widget> _getWeahterItems(ValueNotifier<DateTime> selectedDate, BuildContext context) {
+    final theme = Theme.of(context);
     return weatherData.time.mapIndexed((index, date) {
       return GestureDetector(
         onTap: () {
@@ -51,10 +52,9 @@ class DailyWeatherList extends HookWidget {
         child: Card(
           elevation: 1,
           margin: const EdgeInsets.symmetric(vertical: 3),
-          shadowColor: Colors.grey.shade200,
           shape: RoundedRectangleBorder(
             side: DateUtils.isSameDay(selectedDate.value, date)
-                ? BorderSide(color: Colors.blueAccent.shade200, width: 1)
+                ? BorderSide(color: theme.focusColor, width: 1)
                 : BorderSide.none,
             borderRadius: BorderRadius.circular(10),
           ),

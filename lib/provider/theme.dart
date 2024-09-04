@@ -17,36 +17,44 @@ ThemeData darkTheme(DarkThemeRef ref) {
   final textTheme = ref.watch(textThemeProvider);
   return ThemeData.from(
     colorScheme: const ColorScheme.dark().copyWith(
-      primary: const Color(0xff1f3046),
-      onPrimary: const Color(0xffffffff),
+      primary: const Color(4289054974),
+      onPrimary: const Color.fromARGB(255, 42, 42, 42),
+      primaryContainer: const Color.fromARGB(255, 103, 103, 103),
+      secondary: const Color(4290562012),
+      onSurface: const Color(0xffffffff),
+      surface: const Color.fromARGB(255, 28, 28, 28),
+      surfaceContainerLow: const Color.fromARGB(255, 40, 40, 40),
+      surfaceContainerHighest: const Color.fromARGB(255, 64, 68, 69),
+      onSurfaceVariant: const Color(0xffffffff),
     ),
     textTheme: GoogleFonts.openSansTextTheme(textTheme),
     useMaterial3: true,
   ).copyWith(
-    iconTheme: const IconThemeData(color: Colors.white),
+    shadowColor: Colors.grey.shade800,
   );
 }
 
-// Color(0xffc5e1fd)
 @riverpod
 ThemeData lightTheme(LightThemeRef ref) {
   final textTheme = ref.watch(textThemeProvider);
   return ThemeData.from(
     colorScheme: const ColorScheme.light().copyWith(
       primary: const Color(0xff2b5d98),
-      surfaceBright: const Color(0xffffffff),
       onPrimary: const Color(0xffffffff),
+      surfaceBright: const Color(0xffffffff),
       surface: const Color(0xffffffff),
+      surfaceContainerHighest: const Color.fromARGB(255, 218, 229, 231),
       surfaceContainer: const Color(0xffefefef),
-      secondary: const Color(0xfff6f6f8),
       onSecondary: const Color(0xff3a3949),
+      primaryContainer: const Color.fromARGB(255, 218, 229, 231),
     ),
-    textTheme: GoogleFonts.nunitoTextTheme(textTheme),
+    textTheme: GoogleFonts.openSansTextTheme(textTheme),
     useMaterial3: true,
   ).copyWith(
     iconTheme: const IconThemeData(
       color: Color.fromARGB(255, 58, 58, 58),
     ),
+    focusColor: Colors.blue.shade800,
   );
 }
 

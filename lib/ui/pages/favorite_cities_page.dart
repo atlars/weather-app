@@ -17,8 +17,8 @@ class FavoriteCitiesPage extends ConsumerWidget {
         leading: const BackButton(),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 26),
-        child: TextButton.icon(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 26),
+        child: FilledButton.icon(
           onPressed: () async {
             final result = await showSearch(context: context, delegate: SearchCityDelegate());
             if (result != null) {
@@ -27,11 +27,10 @@ class FavoriteCitiesPage extends ConsumerWidget {
             }
             ref.invalidate(searchCityProvider);
           },
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text('Add city', style: TextStyle(color: Colors.white)),
-          style: TextButton.styleFrom(
-            backgroundColor: Color(0xff0d1342),
-            padding: EdgeInsets.symmetric(vertical: 12.0),
+          icon: const Icon(Icons.add),
+          label: const Text('Add city'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
           ),
         ),
       ),
@@ -45,6 +44,7 @@ class FavoriteCitiesPage extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemBuilder: (context, index) {
         return ListTile(
+          tileColor: theme.colorScheme.surfaceContainer,
           title: Text(cities[index].name),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           trailing: IconButton(
@@ -54,7 +54,6 @@ class FavoriteCitiesPage extends ConsumerWidget {
             },
             color: theme.iconTheme.color,
           ),
-          tileColor: Colors.grey.shade300,
           onTap: () {
             ref.read(selectedCityProvider.notifier).set(cities[index]);
             Navigator.of(context).pop();
