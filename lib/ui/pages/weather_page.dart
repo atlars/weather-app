@@ -145,7 +145,7 @@ class WeatherPage extends HookConsumerWidget {
               children: [
                 Icon(Icons.thermostat, size: 16),
                 SizedBox(width: 2),
-                Text('Temperature'),
+                Text('Temperature', style: TextStyle(fontSize: 12)),
               ],
             ),
           ),
@@ -155,7 +155,7 @@ class WeatherPage extends HookConsumerWidget {
               children: [
                 Icon(Icons.water_drop, size: 16),
                 SizedBox(width: 2),
-                Text('Rain'),
+                Text('Rain', style: TextStyle(fontSize: 12)),
               ],
             ),
           ),
@@ -165,7 +165,7 @@ class WeatherPage extends HookConsumerWidget {
               children: [
                 Icon(Icons.air, size: 16),
                 SizedBox(width: 2),
-                Text('Wind'),
+                Text('Wind', style: TextStyle(fontSize: 12)),
               ],
             ),
           ),

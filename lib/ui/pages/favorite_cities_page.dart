@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/provider/location.dart';
 import 'package:weather_app/ui/views/search_city.dart';
+import 'package:weather_app/util/location.dart';
 
 class FavoriteCitiesPage extends ConsumerWidget {
   const FavoriteCitiesPage({super.key});
@@ -22,7 +23,6 @@ class FavoriteCitiesPage extends ConsumerWidget {
           onPressed: () async {
             final result = await showSearch(context: context, delegate: SearchCityDelegate());
             if (result != null) {
-              ref.read(selectedCityProvider.notifier).set(result);
               ref.read(favoriteCitiesProvider.notifier).add(result);
             }
             ref.invalidate(searchCityProvider);
@@ -39,13 +39,26 @@ class FavoriteCitiesPage extends ConsumerWidget {
   }
 
   Widget _buildFavoriteCitiesList(List<City> cities, WidgetRef ref, BuildContext context) {
+    final selectedCity = ref.watch(selectedCityProvider);
     final theme = Theme.of(context);
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemBuilder: (context, index) {
         return ListTile(
-          tileColor: theme.colorScheme.surfaceContainer,
-          title: Text(cities[index].name),
+          leading: Text(
+            LocationUtils.countryCodeToEmoji(cities[index].countryCode),
+            style: const TextStyle(
+              fontSize: 18,
+              fontFamily: "NotoColorEmoji",
+            ),
+          ),
+          selectedTileColor: theme.colorScheme.primaryContainer,
+          selected: selectedCity?.id == cities[index].id,
+          title: Text(
+            cities[index].name,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(cities[index].admin1 ?? ""),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           trailing: IconButton(
             icon: Icon(Icons.delete),

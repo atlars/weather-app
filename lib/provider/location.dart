@@ -41,9 +41,9 @@ class FavoriteCities extends _$FavoriteCities {
     return cities;
   }
 
-  void saveData() {
+  Future<void> saveData() {
     final prefs = ref.read(prefsProvider).requireValue;
-    prefs.setStringList(PrefsKeys.favoriteCities, state.map((city) => jsonEncode(city.toJson())).toList());
+    return prefs.setStringList(PrefsKeys.favoriteCities, state.map((city) => jsonEncode(city.toJson())).toList());
   }
 
   void remove(City city) {
@@ -53,6 +53,7 @@ class FavoriteCities extends _$FavoriteCities {
   }
 
   void add(City city) {
+    if(state.any((e) => e.id == city.id)) return;
     state = [city, ...state];
     saveData();
   }
@@ -69,14 +70,13 @@ class SelectedCity extends _$SelectedCity {
     return City.fromJson(jsonDecode(rawCity));
   }
 
-  void set(City? city) {
+  void set(City? city) async {
     final prefs = ref.read(prefsProvider).requireValue;
     if (city == null) {
-      prefs.remove(PrefsKeys.selectedCity);
+      await prefs.remove(PrefsKeys.selectedCity);
     } else {
-      prefs.setString(PrefsKeys.selectedCity, jsonEncode(city.toJson()));
+      await prefs.setString(PrefsKeys.selectedCity, jsonEncode(city.toJson()));
     }
-
     ref.invalidateSelf();
   }
 }

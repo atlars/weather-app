@@ -64,6 +64,7 @@ class _WeatherAppState extends ConsumerState<WeatherApp> {
       themeMode: ref.watch(themeModeProvider),
       home: const WeatherPage(),
       scrollBehavior: WebScrollBehavior(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
