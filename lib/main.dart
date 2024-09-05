@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weather_app/provider/prefs.dart';
 import 'package:weather_app/provider/theme.dart';
 import 'package:weather_app/ui/pages/weather_page.dart';
+import 'package:weather_app/util/provider_observer.dart';
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +15,9 @@ void main() {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(
-    const ProviderScope(
-      child: _EagerInitialization(
+    ProviderScope(
+      observers: [if (kDebugMode) AppProviderObserver()],
+      child: const _EagerInitialization(
         child: WeatherApp(),
       ),
     ),
@@ -49,12 +52,12 @@ class WeatherApp extends ConsumerStatefulWidget {
 }
 
 class _WeatherAppState extends ConsumerState<WeatherApp> {
-
   @override
   void initState() {
     super.initState();
     FlutterNativeSplash.remove();
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
