@@ -61,7 +61,7 @@ class _WeatherAppState extends ConsumerState<WeatherApp> {
       title: "Weahter app",
       theme: ref.watch(lightThemeProvider),
       darkTheme: ref.watch(darkThemeProvider),
-      themeMode: ref.watch(themeModeProvider),
+      themeMode: ref.watch(currentThemeModeProvider),
       home: const WeatherPage(),
       scrollBehavior: WebScrollBehavior(),
       debugShowCheckedModeBanner: false,

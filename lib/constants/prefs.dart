@@ -3,4 +3,5 @@ class PrefsKeys {
 
   static const selectedCity = "selected_city";
   static const favoriteCities = "favorite_cities";
+  static const themeMode = "theme_mode";
 }

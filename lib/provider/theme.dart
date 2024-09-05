@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weather_app/constants/prefs.dart';
+import 'package:weather_app/provider/prefs.dart';
 
 part 'theme.g.dart';
 
@@ -58,4 +59,21 @@ ThemeData lightTheme(LightThemeRef ref) {
   );
 }
 
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+@riverpod
+class CurrentThemeMode extends _$CurrentThemeMode {
+  @override
+  ThemeMode build() {
+    final prefs = ref.watch(prefsProvider).requireValue;
+    final themeModeIndex = prefs.getInt(PrefsKeys.themeMode);
+    return ThemeMode.values.singleWhere(
+      (themeMode) => themeMode.index == themeModeIndex,
+      orElse: () => ThemeMode.system,
+    );
+  }
+
+  set(ThemeMode mode) {
+    final prefs = ref.read(prefsProvider).requireValue;
+    state = mode;
+    prefs.setInt(PrefsKeys.themeMode, mode.index);
+  }
+}

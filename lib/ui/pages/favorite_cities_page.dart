@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/provider/location.dart';
+import 'package:weather_app/ui/pages/settings_page.dart';
 import 'package:weather_app/ui/views/search_city.dart';
 import 'package:weather_app/util/location.dart';
 
@@ -15,7 +16,18 @@ class FavoriteCitiesPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Locations"),
-        leading: const BackButton(),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
+            },
+            icon: Icon(Icons.settings),
+          )
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 26),
