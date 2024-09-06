@@ -45,6 +45,6 @@ flutter:
     fonts:
       - asset: assets/fonts/NotoColorEmoji.ttf
 
-# https://pub.dev/packages/flutter_native_splash
+# https://pub.dev/packages/flutter_native_splash/
 flutter_native_splash:
-  color: "#42a5f5"
+  color: "#ffffff"

@@ -25,7 +25,7 @@ class FavoriteCitiesPage extends ConsumerWidget {
                 ),
               );
             },
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
           )
         ],
       ),
@@ -68,12 +68,12 @@ class FavoriteCitiesPage extends ConsumerWidget {
           selected: selectedCity?.id == cities[index].id,
           title: Text(
             cities[index].name,
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           subtitle: Text(cities[index].admin1 ?? ""),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           trailing: IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: () {
               ref.read(favoriteCitiesProvider.notifier).remove(cities[index]);
             },
@@ -83,7 +83,7 @@ class FavoriteCitiesPage extends ConsumerWidget {
             ref.read(selectedCityProvider.notifier).set(cities[index]);
             Navigator.of(context).pop();
           },
-          contentPadding: EdgeInsets.only(left: 14),
+          contentPadding: const EdgeInsets.only(left: 14),
         );
       },
       separatorBuilder: (context, index) => const SizedBox(height: 12),

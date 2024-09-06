@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -59,7 +58,7 @@ class WeatherPage extends HookConsumerWidget {
             Container(
               color: theme.colorScheme.primaryFixed,
               child: SafeArea(
-                child: _buildCurrentWeather(weather, city, context, ref),
+                child: _buildCurrentWeather(weather, city, context, ref, theme),
               ),
             ),
             Column(
@@ -175,15 +174,13 @@ class WeatherPage extends HookConsumerWidget {
     );
   }
 
-  Widget _buildCurrentWeather(Weather weather, City city, BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
+  Widget _buildCurrentWeather(Weather weather, City city, BuildContext context, WidgetRef ref, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildAppBar(theme, context, ref, city),
+          _buildAppBar(city, theme, context, ref),
           Padding(
             padding: const EdgeInsets.only(bottom: 26, top: 18),
             child: Align(
@@ -223,7 +220,7 @@ class WeatherPage extends HookConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(ThemeData theme, BuildContext context, WidgetRef ref, City city) {
+  Widget _buildAppBar(City city, ThemeData theme, BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         Icon(
