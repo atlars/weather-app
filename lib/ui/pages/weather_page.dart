@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -56,7 +57,7 @@ class WeatherPage extends HookConsumerWidget {
         return Stack(
           children: [
             Container(
-              color: const Color(0xffc5e1fd),
+              color: theme.colorScheme.primaryFixed,
               child: SafeArea(
                 child: _buildCurrentWeather(weather, city, context, ref),
               ),
@@ -64,12 +65,12 @@ class WeatherPage extends HookConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 240),
+                const SizedBox(height: 220),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       ),
@@ -176,26 +177,49 @@ class WeatherPage extends HookConsumerWidget {
 
   Widget _buildCurrentWeather(Weather weather, City city, BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildAppBar(theme, context, ref, city),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 25),
+            padding: const EdgeInsets.only(bottom: 26, top: 18),
             child: Align(
               alignment: Alignment.center,
               child: Text(
-                // Todo: fix
-                '${weather.daily.maxTemperatues.last.toInt()}°',
+                '${weather.current.temperatue.toInt()}°',
                 style: theme.textTheme.headlineLarge
-                    ?.copyWith(color: Color(0xff2b5d98), fontWeight: FontWeight.w600, fontSize: 46),
+                    ?.copyWith(color: theme.colorScheme.onPrimaryFixed, fontWeight: FontWeight.w600, fontSize: 46),
               ),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildWeatherDataTile(Icons.water_drop, "${weather.current.rainProbability}%", 3, theme),
+              _buildWeatherDataTile(Icons.air, "${weather.current.windSpeed}km/h", 3, theme)
+            ],
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildWeatherDataTile(IconData icon, String text, double gap, ThemeData theme) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: theme.colorScheme.onPrimaryFixed,
+        ),
+        if (gap > 0) SizedBox(width: gap),
+        Text(
+          text,
+          style: TextStyle(color: theme.colorScheme.onPrimaryFixed, fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+      ],
     );
   }
 
@@ -205,20 +229,20 @@ class WeatherPage extends HookConsumerWidget {
         const Icon(
           Icons.location_on_outlined,
           color: Color(0xff2b5d98),
-          size: 28,
+          size: 24,
         ),
         Text(
           city.name,
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w400, color: Color(0xff2b5d98)),
+          style: TextStyle(fontWeight: FontWeight.w400, color: theme.colorScheme.onPrimaryFixed, fontSize: 20),
         ),
         const Spacer(),
         IconButton(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FavoriteCitiesPage()));
           },
-          icon: const Icon(
+          icon: Icon(
             Icons.menu_sharp,
-            color: Color(0xff2b5d98),
+            color: theme.colorScheme.onPrimaryFixed,
             size: 28,
           ),
         )

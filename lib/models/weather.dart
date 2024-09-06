@@ -12,19 +12,11 @@ class Weather with _$Weather {
     String timezoneAbbreviation,
     DailyWeatherData daily,
     HourlyWeatherData hourly,
+    CurrentWeatherData current
   ) = _Weather;
 
   factory Weather.fromJson(Map<String, Object?> json) =>
       _$WeatherFromJson(json);
-}
-
-@freezed
-sealed class WeatherUnits with _$WeatherUnits {
-  const factory WeatherUnits.daily() = DailyWeatherUnits;
-  const factory WeatherUnits.hourly() = HourlyWeatherUnits;
-
-  factory WeatherUnits.fromJson(Map<String, Object?> json) =>
-      _$WeatherUnitsFromJson(json);
 }
 
 @freezed
@@ -40,7 +32,17 @@ sealed class WeatherData with _$WeatherData {
     List<DateTime> time,
     @JsonKey(name: "temperature_2m") List<double> temperatues,
     @JsonKey(name: "weather_code") List<int> weatherCodes,
+    List<double> rain,
   ) = HourlyWeatherData;
+
+  const factory WeatherData.current(
+    DateTime time,
+    int interval,
+    double rain,
+    @JsonKey(name: "precipitation_probability") double rainProbability,
+    @JsonKey(name: "temperature_2m") double temperatue,
+    @JsonKey(name: "wind_speed_10m") double windSpeed
+  ) = CurrentWeatherData;
 
   factory WeatherData.fromJson(Map<String, Object?> json) =>
       _$WeatherDataFromJson(json);

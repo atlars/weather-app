@@ -16,7 +16,8 @@ class WeatherRepository {
       Urls.weatherForecast,
       queryParameters: {
         "daily": "temperature_2m_min,temperature_2m_max,weather_code",
-        "hourly": "temperature_2m,weather_code"
+        "hourly": "temperature_2m,weather_code,rain",
+        "current": "temperature_2m,rain,wind_speed_10m,precipitation_probability"
       }..addAll(request.toJson()),
     );
 
