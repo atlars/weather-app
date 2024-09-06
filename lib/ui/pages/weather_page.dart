@@ -226,9 +226,9 @@ class WeatherPage extends HookConsumerWidget {
   Widget _buildAppBar(ThemeData theme, BuildContext context, WidgetRef ref, City city) {
     return Row(
       children: [
-        const Icon(
+        Icon(
           Icons.location_on_outlined,
-          color: Color(0xff2b5d98),
+          color: theme.colorScheme.onPrimaryFixed,
           size: 24,
         ),
         Text(

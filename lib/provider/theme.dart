@@ -27,8 +27,8 @@ ThemeData darkTheme(DarkThemeRef ref) {
       surfaceContainerLow: const Color.fromARGB(255, 40, 40, 40),
       surfaceContainerHighest: const Color.fromARGB(255, 64, 68, 69),
       onSurfaceVariant: const Color(0xffffffff),
-      primaryFixed: const Color(0xffc5e1fd),
-      onPrimaryFixed: const Color(0xff2b5d98)
+      primaryFixed: const Color(0xff1e2f44),
+      onPrimaryFixed: const Color(0xffffffff)
     ),
     textTheme: GoogleFonts.openSansTextTheme(textTheme),
     useMaterial3: true,
