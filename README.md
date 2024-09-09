@@ -67,3 +67,16 @@ weather_app/
 ├── pubspec.yaml
 └── README.md
 ```
+
+## Screenshots
+||||
+|----|----|----|
+| ![lm_home] | ![lm_locations] | ![lm_settings] |
+| ![dm_home] | ![dm_locations] | ![dm_settings] |
+
+  [lm_home]: ./docs/screenshots/lm_home.jpg
+  [lm_locations]: ./docs/screenshots/lm_locations.jpg
+  [lm_settings]: ./docs/screenshots/lm_settings.jpg
+  [dm_home]: ./docs/screenshots/dm_home.jpg
+  [dm_locations]: ./docs/screenshots/dm_locations.jpg
+  [dm_settings]: ./docs/screenshots/dm_settings.jpg
