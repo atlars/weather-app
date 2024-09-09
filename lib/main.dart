@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weather_app/provider/prefs.dart';
@@ -13,6 +14,9 @@ void main() {
 
   // Preserves the native splash screen until FlutterNativeSplash.remove() is called
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // https://developer.android.com/develop/ui/views/layout/edge-to-edge
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(
     ProviderScope(
@@ -60,14 +64,17 @@ class _WeatherAppState extends ConsumerState<WeatherApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Weahter app",
-      theme: ref.watch(lightThemeProvider),
-      darkTheme: ref.watch(darkThemeProvider),
-      themeMode: ref.watch(currentThemeModeProvider),
-      home: const WeatherPage(),
-      scrollBehavior: WebScrollBehavior(),
-      debugShowCheckedModeBanner: false,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: ref.watch(systemOverlayStyleProvider),
+      child: MaterialApp(
+        title: "Weahter app",
+        theme: ref.watch(lightThemeProvider),
+        darkTheme: ref.watch(darkThemeProvider),
+        themeMode: ref.watch(currentThemeModeProvider),
+        home: const WeatherPage(),
+        scrollBehavior: WebScrollBehavior(),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

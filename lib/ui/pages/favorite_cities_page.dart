@@ -29,20 +29,23 @@ class FavoriteCitiesPage extends ConsumerWidget {
           )
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 26),
-        child: FilledButton.icon(
-          onPressed: () async {
-            final result = await showSearch(context: context, delegate: SearchCityDelegate());
-            if (result != null) {
-              ref.read(favoriteCitiesProvider.notifier).add(result);
-            }
-            ref.invalidate(searchCityProvider);
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Add city'),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
+      bottomNavigationBar: SafeArea(
+        maintainBottomViewPadding: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 26),
+          child: FilledButton.icon(
+            onPressed: () async {
+              final result = await showSearch(context: context, delegate: SearchCityDelegate());
+              if (result != null) {
+                ref.read(favoriteCitiesProvider.notifier).add(result);
+              }
+              ref.invalidate(searchCityProvider);
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add city'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+            ),
           ),
         ),
       ),
