@@ -97,7 +97,7 @@ class WeatherPage extends HookConsumerWidget {
         );
       },
       error: (error, stacktrace) {
-        return const Center(child: Text("Error"));
+        return const Center(child: Text("Error: Cannot fetch weather"));
       },
       loading: () => const Center(
         child: Padding(

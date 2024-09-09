@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/util/pair.dart';
 import 'package:weather_app/util/weather.dart';
 
 class WeatherItem extends StatelessWidget {
   final int wmoCode;
-  final Pair<double, double>? minMaxTemperature;
+  final ({double minTemp, double maxTemp})? minMaxTemperature;
   final double temperature;
 
   const WeatherItem({this.minMaxTemperature, required this.wmoCode, this.temperature = 0.0, super.key});
@@ -32,12 +31,12 @@ class WeatherItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '${minMaxTemperature!.last.toInt()}°',
+            '${minMaxTemperature!.minTemp.toInt()}°',
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 3),
           Text(
-            '${minMaxTemperature!.first.toInt()}°',
+            '${minMaxTemperature!.maxTemp.toInt()}°',
             style: TextStyle(
               fontWeight: FontWeight.w400,
               color: Colors.grey.shade500,

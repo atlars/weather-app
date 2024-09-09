@@ -16,8 +16,6 @@ Future<List<City>> searchCity(SearchCityRef ref, {String search = ""}) async {
   final cancelToken = ref.cancelToken();
   final locationRepository = ref.watch(locationRepostioryProvider);
 
-  ref.onDispose(() => print("Dipose $search"));
-
   await Future<void>.delayed(const Duration(milliseconds: 300));
 
   if (cancelToken.isCancelled) {

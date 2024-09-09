@@ -18,10 +18,10 @@ ThemeData darkTheme(DarkThemeRef ref) {
   final textTheme = ref.watch(textThemeProvider);
   return ThemeData.from(
     colorScheme: const ColorScheme.dark().copyWith(
-      primary: const Color(4289054974),
+      primary: const Color(0xffa5c8fe),
       onPrimary: const Color.fromARGB(255, 42, 42, 42),
       primaryContainer: const Color.fromARGB(255, 103, 103, 103),
-      secondary: const Color(4290562012),
+      secondary: const Color(0xffbcc7dc),
       onSurface: const Color(0xffffffff),
       surface: const Color.fromARGB(255, 28, 28, 28),
       surfaceContainerLow: const Color.fromARGB(255, 40, 40, 40),

@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/ui/widgets/weather_item.dart';
-import 'package:weather_app/util/pair.dart';
 
 class DailyWeatherList extends HookWidget {
   final DailyWeatherData weatherData;
@@ -65,11 +64,11 @@ class DailyWeatherList extends HookWidget {
                 Text(DateFormat('E').format(date)),
                 WeatherItem(
                   wmoCode: weatherData.weatherCodes[index],
-                  minMaxTemperature: Pair(
-                    weatherData.minTemperatues[index],
-                    weatherData.maxTemperatues[index],
+                  minMaxTemperature: (
+                    minTemp: weatherData.minTemperatues[index],
+                    maxTemp: weatherData.maxTemperatues[index]
                   ),
-                )
+                ),
               ],
             ),
           ),
